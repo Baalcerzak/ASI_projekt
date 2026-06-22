@@ -1,1 +1,14 @@
-# dependencies
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+kedro
+kedro-datasets[pandas-csvdataset, pandas-parquetdataset, pickle-pickledataset, json-jsondataset]
+mlflow
+pycaret
+fastapi
+uvicorn
+pytest
+pyarrow
+pydantic
