@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Kedro - dane (lokalne, nie commitujemy dużych plików)
+data/02_intermediate/
+data/03_primary/
+data/04_feature/
+data/05_model_input/
+data/06_models/
+data/07_model_output/
+data/08_reporting/
+data/01_raw/*.csv
+
+AutogluonModels/
+catboost_info/
+
+# MLflow
+mlruns/
+mlflow.db
+
+# Logi
+logs/
+
+# Środowisko wirtualne
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# IDE
+.idea/
+.vscode/
+
+# macOS
+.DS_Store
+

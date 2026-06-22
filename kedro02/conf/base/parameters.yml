@@ -1,0 +1,43 @@
+reference_year: 2021
+price_min: 500
+price_max: 300000
+mileage_max: 1500000
+test_size: 0.2
+random_state: 42
+smoothing_factor: 15
+
+luxury_brands:
+  - LEXUS
+  - BMW
+  - MERCEDES-BENZ
+  - PORSCHE
+  - JAGUAR
+  - LAND ROVER
+  - TESLA
+  - BENTLEY
+  - MASERATI
+
+# Random Forest
+rf_n_estimators: 500
+rf_max_depth: 15
+rf_min_samples_split: 10
+rf_min_samples_leaf: 5
+rf_max_features: 0.5
+
+# Gradient Boosting
+gb_n_estimators: 500
+gb_learning_rate: 0.05
+gb_max_depth: 5
+gb_subsample: 0.8
+
+# Strojenie hiperparametrów
+tuning_n_iter: 20
+tuning_cv: 3
+
+# AutoML (AutoGluon)
+automl_time_limit: 120
+automl_presets: medium_quality
+
+# MLflow
+mlflow_experiment_name: car_price_prediction
+mlflow_tracking_uri: sqlite:///mlflow.db

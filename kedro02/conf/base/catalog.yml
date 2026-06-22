@@ -1,0 +1,100 @@
+train_raw:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/train.csv
+
+cleaned_data:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/cleaned_data.parquet
+
+preprocessed_data:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/preprocessed_data.parquet
+
+X_train:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/X_train.parquet
+
+X_test:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/X_test.parquet
+
+y_train:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/y_train.parquet
+
+y_test:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/y_test.parquet
+
+X_train_encoded:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/X_train_encoded.parquet
+
+X_test_encoded:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/X_test_encoded.parquet
+
+preprocessed_train:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/preprocessed_train.parquet
+
+preprocessed_test:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/preprocessed_test.parquet
+
+selected_train:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/selected_train.parquet
+
+selected_test:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/selected_test.parquet
+
+target_encoders:
+  type: pickle.PickleDataset
+  filepath: data/06_models/target_encoders.pickle
+  backend: pickle
+
+selected_features:
+  type: pickle.PickleDataset
+  filepath: data/06_models/selected_features.pickle
+  backend: pickle
+
+training_stats:
+  type: json.JSONDataset
+  filepath: data/06_models/training_stats.json
+
+regressor:
+  type: pickle.PickleDataset
+  filepath: data/06_models/regressor.pickle
+  backend: pickle
+
+gradient_boosting_model:
+  type: pickle.PickleDataset
+  filepath: data/06_models/gradient_boosting_model.pickle
+  backend: pickle
+
+tuned_rf_model:
+  type: pickle.PickleDataset
+  filepath: data/06_models/tuned_rf_model.pickle
+  backend: pickle
+
+metrics_rf:
+  type: json.JSONDataset
+  filepath: data/08_reporting/metrics_rf.json
+
+metrics_gb:
+  type: json.JSONDataset
+  filepath: data/08_reporting/metrics_gb.json
+
+metrics_tuned_rf:
+  type: json.JSONDataset
+  filepath: data/08_reporting/metrics_tuned_rf.json
+
+metrics_automl:
+  type: json.JSONDataset
+  filepath: data/08_reporting/metrics_automl.json
+
+model_comparison:
+  type: json.JSONDataset
+  filepath: data/08_reporting/model_comparison.json

@@ -1,0 +1,27 @@
+[tool.kedro]
+package_name = "kedro02"
+project_name = "Kedro02 - Car Price Prediction"
+kedro_init_version = "1.4.0"
+source_dir = "src"
+
+[project]
+name = "kedro02"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "kedro>=0.19.0",
+    "kedro-datasets[pandas-csvdataset,pandas-parquetdataset,pickle-pickledataset,json-jsondataset]",
+    "pandas",
+    "numpy",
+    "scikit-learn",
+    "mlflow",
+    "pyarrow",
+    "matplotlib",
+    "seaborn",
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic>=2.0",
+]
+
+[tool.kedro_telemetry]
+project_id = "kedro02_car_price_prediction"
