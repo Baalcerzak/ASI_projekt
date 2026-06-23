@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
+from pycaret import regression as pcr
 
 BASE_DIR = Path(__file__).resolve().parents[3]
 MODELS_DIR = BASE_DIR / "data" / "06_models"
@@ -26,6 +27,7 @@ _selected_features = None
 _training_stats = None
 _model_comparison = None
 _best_model_name = None
+_is_pycaret = False
 
 # LOGGING CONFIGURATION
 logging.basicConfig(
@@ -55,7 +57,7 @@ def load_artifacts():
         "RandomForest": "regressor.pickle",
         "GradientBoosting": "gradient_boosting_model.pickle",
         "TunedRandomForest": "tuned_rf_model.pickle",
-        "PyCaret": "tuned_rf_model.pickle",
+        "PyCaret": "pycaret_model.pkl",
     }
     model_file = model_map.get(best, "regressor.pickle")
     model_path = MODELS_DIR / model_file
@@ -67,10 +69,20 @@ def load_artifacts():
                 model_path = p
                 break
 
+
     if model_path.exists():
-        with open(model_path, "rb") as f:
-            _model = pickle.load(f)
-        logger.info(f"Załadowano model: {model_path.name}")
+        try:
+            if best == "PyCaret":
+                stem = (MODELS_DIR / "pycaret_model").as_posix()
+                _model = pcr.load_model(stem)
+                logger.info("Załadowano model PyCaret: pycaret_model.pkl")
+            else:
+                with open(model_path, "rb") as f:
+                    _model = pickle.load(f)
+                logger.info(f"Załadowano model: {model_path.name}")
+        except Exception as e:
+            logger.exception(f"Błąd ładowania modelu ({best}): {e}")
+            _model = None
     else:
         logger.warning("Brak wytrenowanego modelu. Uruchom najpierw: kedro run")
 
@@ -264,9 +276,6 @@ def predict(request: PredictionRequest, background_tasks: BackgroundTasks):
     if _selected_features:
         available = [f for f in _selected_features if f in df.columns]
         df = df[available]
-
-    # Drop any remaining non-numeric columns that the model cannot handle
-    df = df.select_dtypes(include=[float, int, "number"])
 
     log_preds = _model.predict(df)
     prices = np.expm1(log_preds).tolist()

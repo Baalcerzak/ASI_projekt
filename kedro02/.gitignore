@@ -21,6 +21,7 @@ data/01_raw/*.csv
 
 AutogluonModels/
 catboost_info/
+logs.log
 
 # MLflow
 mlruns/

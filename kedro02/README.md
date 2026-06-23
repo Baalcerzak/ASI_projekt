@@ -4,8 +4,8 @@ Projekt zaliczeniowy z zakresu MLOps. Przewidywanie cen samochodów używanych n
 
 **Dataset:** [Car Prices Dataset – Kaggle](https://www.kaggle.com/datasets/sidharth178/car-prices-dataset/data)  
 **Problem:** Regresja – przewidywanie ceny samochodu (USD)  
-**Modele:** Random Forest, Gradient Boosting  
-**Stack:** Kedro · MLflow · FastAPI · Docker
+**Modele:** Random Forest, Gradient Boosting, AutoGluon (AutoML)  
+**Stack:** Kedro · MLflow · AutoGluon · FastAPI · Docker
 
 ---
 
@@ -19,6 +19,7 @@ Projekt zaliczeniowy z zakresu MLOps. Przewidywanie cen samochodów używanych n
 6. [MLflow – śledzenie eksperymentów](#mlflow)
 7. [Docker](#docker)
 8. [Wyniki](#wyniki)
+9. [Monitoring](#monitoring)
 
 ---
 
@@ -93,13 +94,14 @@ kedro02/
 
 ## Pipeline ML
 
-Pipeline składa się z 10 węzłów Kedro:
+Pipeline składa się z węzłów Kedro pogrupowanych w etapy:
 
 ```
 train_raw
     │
     ▼
-clean_data_node          ← czyszczenie, inżynieria cech, filtrowanie outlierów
+[preprocessing]
+clean_data_node          ← czyszczenie, filtrowanie outlierów
     │
     ├──► save_training_stats_node   ← statystyki do monitoringu driftu
     │
@@ -110,6 +112,7 @@ preprocess_data_node     ← log-transformacja ceny
 split_data_node          ← podział 80/20 train/test
     │
     ▼
+[feature_engineering]
 create_target_encoders_node  ← target encoding dla zmiennych kategorycznych
     │
     ├──► apply_encoders_train_node
@@ -121,16 +124,19 @@ create_target_encoders_node  ← target encoding dla zmiennych kategorycznych
               ▼
          select_features_node      ← selekcja cech (SelectFromModel RF)
               │
-    ┌─────────┴──────────┐
-    ▼                    ▼
-train_rf_node      train_gb_node
-    │                    │
-    ▼                    ▼
-evaluate_rf_node   evaluate_gb_node
-    │                    │
-    └─────────┬──────────┘
-              ▼
-        compare_models_node  ← wybór lepszego modelu
+    ┌─────────┴──────────┬──────────────┐
+    ▼                    ▼              ▼
+[training]          [tuning]        [automl]
+train_rf_node   tune_hyperparams_node  train_automl_node
+train_gb_node        │                     │
+    │                ▼                     ▼
+    ▼         evaluate_tuned_node   evaluate_automl_node
+evaluate_rf_node                          │
+evaluate_gb_node                          │
+    │                    │                │
+    └────────────────────┴────────────────┘
+                         ▼
+                 compare_models_node  ← wybór najlepszego modelu
 ```
 
 ### Uruchomienie pełnego pipeline'u
@@ -144,7 +150,10 @@ kedro run
 
 ```bash
 kedro run --tags preprocessing
+kedro run --tags feature_engineering
 kedro run --tags training
+kedro run --tags tuning
+kedro run --tags automl
 kedro run --tags evaluation
 ```
 
@@ -161,7 +170,14 @@ kedro run --node clean_data_node
 ### Wymagania
 
 ```bash
-pip install kedro>=0.19.0 pandas numpy scikit-learn mlflow pyarrow fastapi "uvicorn[standard]" "pydantic>=2.0"
+pip install kedro>=0.19.0 kedro-datasets pandas numpy scikit-learn mlflow pyarrow matplotlib seaborn fastapi "uvicorn[standard]" "pydantic>=2.0"
+```
+
+Lub z pliku konfiguracyjnego projektu:
+
+```bash
+cd kedro02
+pip install -e .
 ```
 
 ### Dane
@@ -185,6 +201,8 @@ jupyter notebook notebooks/01_car_price_baseline.ipynb
 ---
 
 ## API
+
+> ⚠️ **Uwaga:** Moduł FastAPI (`src/kedro02/api.py`) jest obecnie zakomentowany i nieaktywny. Poniższy opis przedstawia planowaną funkcjonalność.
 
 FastAPI serwuje predykcje wytrenowanego modelu.
 
@@ -290,8 +308,11 @@ API dostępne pod: http://localhost:8000
 |-------|-----------|-----------|------------|
 | Random Forest | 0.744 | 5 402 | 12 559 |
 | Gradient Boosting | **0.751** | 5 433 | **11 401** |
+| RF (po tuningu) | – | – | – |
+| GB (po tuningu) | – | – | – |
+| AutoGluon | – | – | – |
 
-> Lepszy model: **Gradient Boosting** (wyższe R², niższe RMSE)
+> Najlepszy model wybierany jest automatycznie przez węzeł `compare_models_node` na podstawie R² i RMSE.
 
 Transformacja logarytmiczna ceny znacząco poprawia jakość modelu.  
 Najważniejsze cechy: wiek auta, przebieg, pojemność silnika, marka.

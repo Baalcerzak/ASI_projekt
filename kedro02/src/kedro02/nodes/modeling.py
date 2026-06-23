@@ -251,11 +251,11 @@ def tune_hyperparameters(
     y_train = train_data["Price"]
 
     param_dist = {
-        "n_estimators": randint(100, 600),
+        "n_estimators": randint(100, 1100),
         "max_depth": randint(5, 25),
         "min_samples_split": randint(2, 20),
         "min_samples_leaf": randint(1, 10),
-        "max_features": uniform(0.3, 0.6),
+        "max_features": uniform(0.3, 0.7),
     }
 
     base_model = RandomForestRegressor(random_state=random_state, n_jobs=-1)
@@ -318,8 +318,20 @@ def train_automl(
         log_experiment=False,
     )
 
-    best_model = pcr.compare_models(sort="R2", turbo=True)
+    best_model = pcr.compare_models(
+        sort="R2",
+        turbo=True,
+        budget_time=automl_time_limit,
+    )
+
     final_model = pcr.finalize_model(best_model)
+
+    from pathlib import Path
+
+    models_dir = Path(__file__).resolve().parents[3] / "data" / "06_models"
+    models_dir.mkdir(parents=True, exist_ok=True)
+    model_stem = models_dir / "pycaret_model"
+    pcr.save_model(final_model, str(model_stem))
 
     preds_df = pcr.predict_model(final_model, data=X_test.copy())
     y_pred = preds_df["prediction_label"].values
@@ -343,6 +355,8 @@ def train_automl(
         for k, v in metrics.items():
             if isinstance(v, float):
                 mlflow.log_metric(k, v)
+
+        mlflow.log_artifact(str(model_stem) + ".pkl", artifact_path="automl_model")
 
     logger.info(
         f"PyCaret zakończony | R²={metrics['r2']:.4f}, MAE={metrics['mae']:.0f} "
