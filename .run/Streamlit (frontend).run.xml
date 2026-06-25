@@ -2,7 +2,7 @@
   <configuration default="false" name="Streamlit (frontend)" type="PythonConfigurationType" factoryName="Python" folderName="Frontend">
     <module name="kedro02" />
     <option name="SCRIPT_NAME" value="-m streamlit" />
-    <option name="PARAMETERS" value="run kedro02/src/kedro02/streamlit_app.py" />
+    <option name="PARAMETERS" value="run kedro02/src/kedro02/pipelines/streamlit_app.py" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
