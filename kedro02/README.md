@@ -20,6 +20,7 @@ Projekt zaliczeniowy z zakresu MLOps. Przewidywanie cen samochodów używanych n
 7. [Docker](#docker)
 8. [Wyniki](#wyniki)
 9. [Monitoring](#monitoring)
+10. [Frontend (Streamlit)](#frontend-streamlit)
 
 ---
 
@@ -323,3 +324,38 @@ Najważniejsze cechy: wiek auta, przebieg, pojemność silnika, marka.
 
 Predykcje API są logowane do `logs/predictions.log` (format JSON Lines).  
 Endpoint `/drift` zwraca statystyki danych treningowych do porównania z danymi produkcyjnymi.
+
+---
+
+## Frontend (Streamlit)
+
+Prosty interfejs użytkownika (UI) do korzystania z API został dodany w Streamlit.
+
+### Uruchomienie
+
+1) Zainstaluj zależności (w tym streamlit i requests):
+
+```bash
+pip install -r requirements.txt
+```
+
+2) Upewnij się, że backend FastAPI działa (domyślnie na http://localhost:8000):
+
+```bash
+cd kedro02
+uvicorn kedro02.api.app:app --host 0.0.0.0 --port 8000 --reload
+```
+
+3) W nowym terminalu uruchom Streamlit (możesz podać adres API przez zmienną środowiskową):
+
+```bash
+export STREAMLIT_API_URL="http://localhost:8000"
+streamlit run kedro02/src/kedro02/frontend/streamlit_app.py
+```
+
+Po starcie UI będzie dostępny pod adresem: http://localhost:8501
+
+W bocznym panelu możesz podejrzeć/zmienić adres API. Frontend obsługuje:
+- Formularz predykcji jednego auta (POST /predict)
+- Podgląd historii (GET /predictions/history)
+- Informacje o modelu i drift (GET /model/info, GET /drift/report)

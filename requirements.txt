@@ -12,3 +12,5 @@ uvicorn
 pytest
 pyarrow
 pydantic
+streamlit
+requests
