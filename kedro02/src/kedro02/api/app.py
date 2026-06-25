@@ -3,6 +3,7 @@ import logging
 import pickle
 import time
 from contextlib import asynccontextmanager
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
@@ -13,7 +14,13 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
 from pycaret import regression as pcr
 
-BASE_DIR = Path(__file__).resolve().parents[3]
+
+_default_base = Path(os.environ.get("APP_BASE_DIR", "/app"))
+if not _default_base.exists():
+    _default_base = Path.cwd()
+
+
+BASE_DIR = _default_base
 MODELS_DIR = BASE_DIR / "data" / "06_models"
 REPORTING_DIR = BASE_DIR / "data" / "08_reporting"
 LOGS_DIR = BASE_DIR / "logs"
@@ -34,7 +41,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
     handlers=[
-        logging.FileHandler("logs/predictions.log"),
+        logging.FileHandler(str(LOGS_DIR / "predictions.log")),
         logging.StreamHandler(),
     ],
 )

@@ -1,5 +1,4 @@
-FROM python:3.10-slim
-
+FROM python:3.10-slim AS builder
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -7,11 +6,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml ./
-COPY src/ ./src/
-COPY conf/ ./conf/
-COPY data/06_models/ ./data/06_models/
-COPY logs/ ./logs/
-
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir \
         kedro>=0.19.0 \
@@ -20,11 +14,32 @@ RUN pip install --no-cache-dir --upgrade pip && \
         scikit-learn \
         mlflow \
         pyarrow \
+        "pycaret==3.3.2" \
         fastapi \
         "uvicorn[standard]" \
         "pydantic>=2.0"
 
-RUN pip install --no-cache-dir -e .
+COPY src/ ./src/
+RUN pip install --no-cache-dir .
+
+FROM python:3.10-slim
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/local /usr/local
+COPY conf/ ./conf/
+COPY data/06_models/ ./data/06_models/
+
+RUN mkdir -p /app/logs && chown -R 1000:1000 /app
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+RUN useradd -u 1000 -m appuser
+USER appuser
 
 EXPOSE 8000
 
